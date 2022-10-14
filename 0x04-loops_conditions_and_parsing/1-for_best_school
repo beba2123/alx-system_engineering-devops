@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# printing text ten times
-for _ in {1..10}
-do
-echo "Best School"
-done

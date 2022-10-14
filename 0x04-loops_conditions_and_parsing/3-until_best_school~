@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-# This prints using "until"
-counter = 0
-until [ $counter -lt 1];
-do
-    echo "Best School"
-    let "counter--"
-done
