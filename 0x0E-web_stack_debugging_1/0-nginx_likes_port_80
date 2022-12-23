@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Fix port assignation
-sed -i 's/listen 8080 default_server;/listen 80;/' /etc/nginx/sites-enabled/default
-sed -i 's/listen \[::\]:8080 default_server ipv6only=on;/server_name localhost;/' /etc/nginx/sites-enabled/default
-service nginx restart
+#Nginx must be running, and listening on port 80
+sudo sed -i "s/sites-enabled/sites-available/" /etc/nginx/nginx.conf
+sudo service nginx restart
