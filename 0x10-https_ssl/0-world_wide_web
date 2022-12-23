@@ -1,35 +1,35 @@
 #!/usr/bin/env bash
-# a script that display information for subdomains
-subdomainInfo () {
-   if [ "$#" == 1 ]
-   then
-       wwwsubdomain=$(dig www."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $1}' | awk -F "." '{print $1}')
-       wwwrecordtype=$(dig www."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $4}')
-       wwwdestination=$(dig www."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $5}')
+# Displays informtation about subdomains.
 
-       lbsubdomain=$(dig lb-01."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $1}' | awk -F "." '{print $1}')
-       lbrecordtype=$(dig lb-01."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $4}')
-       lbdestination=$(dig lb-01."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $5}')
+# uncomment for debugging purposes.
+#set -x
 
-       web1subdomain=$(dig web-01."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $1}' | awk -F "." '{print $1}')
-       web1recordtype=$(dig web-01."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $4}')
-       web1destination=$(dig web-01."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $5}')
+# for the checker to work please remove the colors.
 
-       web2subdomain=$(dig web-02."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $1}' | awk -F "." '{print $1}')
-       web2recordtype=$(dig web-02."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $4}')
-       web2destination=$(dig web-02."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $5}')
+# colors
+blue='\e[1;34m'
+brown='\e[0;33m'
+reset='\033[0m'
 
-       echo "The subdomain $wwwsubdomain is a $wwwrecordtype record and points to $wwwdestination"
-       echo "The subdomain $lbsubdomain is a $lbrecordtype record and points to $lbdestination"
-       echo "The subdomain $web1subdomain is a $web1recordtype record and points to $web1destination"
-       echo "The subdomain $web2subdomain is a $web2recordtype record and points to $web2destination"
-    else
-        subdomain=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $1}' | awk -F "." '{print $1}')
-        recordtype=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $4}')
-        destination=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | grep 'IN' | awk '{print $5}')
+# variables & parameters
+subdomains=( "www" "lb-01" "web-01" "web-02" )
+domain="$1"
+sub="$2"
 
-        echo "The subdomain $subdomain is a $recordtype record and points to $destination"
-    fi
+dig_cmd () {
+	# func variables
+	sub="$2"
+	INFO="$(dig "$sub.$domain" | grep -A1 'ANSWER SECTION:' | awk 'NR==2')"
+	IP=$(echo "$INFO" | awk '{print $5}')
+	RECORD=$(echo "$INFO" | awk '{print $4}')
+
+	echo -e "${brown}The subdomain ${blue}$sub${brown} is a ${blue}$RECORD${brown} record and points to ${blue}$IP${reset}"
 }
 
-subdomainInfo "$@"
+if [ $# -eq 1 ]; then
+	for subs in "${subdomains[@]}"; do
+		dig_cmd "$domain" "$subs"
+	done
+elif [ $# -eq 2 ]; then
+	dig_cmd "$domain" "$sub"
+fi
