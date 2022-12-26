@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
-# This script installs a nginx web server
+# This bash script Installs nginx webserver
 
-sudo apt update
-sudo apt-get -y install nginx 
-sudo ufw allow 22
-sudo ufw allow 80
-sudo ufw --force enable
-sudo ufw status
-systemctl status nginx
-echo 'Hello World!' | sudo tee /var/www/html/index.nginx-debian.html > /dev/null
-sudo service nginx restart
+apt-get update
+apt-get install nginx -y
+
+
+echo "Hello World!" > /var/www/html/index.html
+
+printf %s "server {
+     listen      80 default_server;
+     listen      [::]:80 default_server;
+     root        /var/www/html;
+     index       index.html index.nginix-debian.html index.htm;
+}
+" > /etc/nginx/sites-available/default
+
+service nginx restart
