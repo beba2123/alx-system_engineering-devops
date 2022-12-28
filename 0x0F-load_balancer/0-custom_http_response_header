@@ -1,12 +1,30 @@
 #!/usr/bin/env bash
-# Bash script that install nginx listening on port 80
-# When querying Nginx at its root / with a GET request (requesting a page) using curl,
-#+ it will return a page that contains the string Hello World!
-#+ Nginx server is configured so that /redirect_me is redirecting to another page
-#+ Configure Nginx so that its HTTP response contains a custom header
-apt-get -y install nginx
-echo "Hello World!" > /var/www/html/index.nginx-debian.html
-new_string="\n\t location /redirect_me {\n\t return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4; \n\t}\n"
-sed -i "53s+.*+$new_string+" /etc/nginx/sites-available/default
-sed -i '58a \\t\tadd_header X-Served-By $hostname;' /etc/nginx/sites-available/default
+# This bash script configures nginx server so that its HTTP response contains a custom header.
+
+apt-get update
+apt-get install nginx -y
+
+
+echo "Hello World!" > /var/www/html/index.html
+
+touch /var/www/html/custom_404.html
+echo "Ceci n'est pas une page" > /var/www/html/custom_404.html
+
+printf %s "server {
+     listen      80 default_server;
+     listen      [::]:80 default_server;
+     root        /var/www/html;
+     index       index.html index.htm;
+     add_header X-Served-By $HOSTNAME;
+     location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+    error_page 404 /custom_404.html;
+    location /custom_404 {
+      root /var/www/html;
+      internal;
+    }
+}
+" > /etc/nginx/sites-available/default
+
 service nginx restart
